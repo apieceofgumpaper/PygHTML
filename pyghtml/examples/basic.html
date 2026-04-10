@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PygHTML - Basic Example</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0e14;
+        --panel: rgba(255, 255, 255, 0.06);
+        --text: rgba(255, 255, 255, 0.88);
+        --muted: rgba(255, 255, 255, 0.62);
+        --accent: #62d6ff;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: radial-gradient(1000px 600px at 20% 10%, #16213a 0%, var(--bg) 70%);
+        color: var(--text);
+        font: 14px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      }
+      .wrap {
+        height: 100%;
+        display: grid;
+        grid-template-columns: minmax(260px, 360px) 1fr;
+        gap: 18px;
+        padding: 18px;
+        box-sizing: border-box;
+      }
+      .card {
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: var(--panel);
+        border-radius: 14px;
+        padding: 14px 14px 12px;
+        backdrop-filter: blur(10px);
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 8px;
+        letter-spacing: 0.2px;
+      }
+      p {
+        margin: 0 0 8px;
+        color: var(--muted);
+      }
+      kbd {
+        font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        padding: 2px 6px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(0, 0, 0, 0.22);
+        color: var(--text);
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        border-radius: 14px;
+        outline: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(0, 0, 0, 0.25);
+      }
+      .canvasCard {
+        padding: 0;
+        overflow: hidden;
+      }
+      @media (max-width: 860px) {
+        .wrap {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto minmax(360px, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>PygHTML: bouncing dot</h1>
+        <p>This runs real <code>pygame</code> in the browser (CPython WASM + pygame-ce), bundled in this repo.</p>
+        <p>Keys: <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to steer, <kbd>ESC</kbd> to quit.</p>
+        <p style="margin-top: 10px">
+          Source:
+          <a href="./basic.html">basic.html</a>
+        </p>
+      </div>
+
+      <div class="card canvasCard">
+        <canvas id="game" data-pyghtml></canvas>
+      </div>
+    </div>
+
+    <script type="module">
+      import { PygHTML } from "../pyghtml.js";
+      PygHTML.autorun({ canvas: "#game" }).catch((err) => {
+        console.error(err);
+        alert(String(err?.message || err));
+      });
+    </script>
+
+    <script type="text/pyghtml" data-pyghtml>
+import asyncio
+import pygame
+
+pygame.init()
+pygame.display.set_caption("PygHTML: Bouncing Dot")
+
+W, H = 900, 520
+screen = pygame.display.set_mode((W, H))
+clock = pygame.time.Clock()
+
+font = pygame.font.SysFont("ui-sans-serif", 20, bold=True)
+
+x, y = W // 2, H // 2
+vx, vy = 2.4, 1.6
+
+player_x, player_y = W // 2, H // 2
+speed = 4.2
+
+async def main():
+    global x, y, vx, vy, player_x, player_y
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+                running = False
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            player_y -= speed
+        if keys[pygame.K_s]:
+            player_y += speed
+        if keys[pygame.K_a]:
+            player_x -= speed
+        if keys[pygame.K_d]:
+            player_x += speed
+
+        player_x = max(14, min(W - 14, int(player_x)))
+        player_y = max(14, min(H - 14, int(player_y)))
+
+        x += vx
+        y += vy
+        if x < 12 or x > W - 12:
+            vx = -vx
+        if y < 12 or y > H - 12:
+            vy = -vy
+
+        screen.fill((11, 14, 20))
+        pygame.draw.rect(screen, (98, 214, 255), (18, 18, W - 36, H - 36), 2)
+        pygame.draw.circle(screen, (255, 223, 96), (int(x), int(y)), 10)
+        pygame.draw.circle(screen, (110, 255, 180), (player_x, player_y), 12)
+
+        label = font.render("WASD to move, ESC to quit", True, (235, 235, 245))
+        screen.blit(label, (28, 28))
+
+        pygame.display.flip()
+        clock.tick(60)
+        await asyncio.sleep(0)
+
+    pygame.quit()
+
+asyncio.run(main())
+    </script>
+  </body>
+</html>
+

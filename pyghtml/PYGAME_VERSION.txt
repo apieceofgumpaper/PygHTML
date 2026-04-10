@@ -1,0 +1,13 @@
+PygHTML Runtime Pins
+===================
+
+Runtime bundle: pygame-web/archives (folder 0.9) vendored under:
+  engine/vendor/archives/0.9
+
+Interpreter: CPython 3.12 (WASM build: cpython312)
+
+Pygame build: pygame-ce compiled to WebAssembly and shipped in that bundle.
+The distribution name used by the upstream project is `pygame_static` (wheel version 1.0).
+
+TODO: record the exact pygame/pygame-ce version string once we have a tiny in-browser
+smoke test that prints `pygame.version.ver` / `pygame.__version__`.
